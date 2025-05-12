@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Гра — Шлях зрілості</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Дні гри</h2>
+      <ul id="daysList"></ul>
+    </aside>
+    <main class="content">
+      <h1 id="dayTitle"></h1>
+      <p id="dayContent"></p>
+      <div id="dayAssets"></div>
+    </main>
+  </div>
+
+  <script>
+    const titles = {
+      1: "✨ ДЕНЬ 1 – Точка А",
+      2: "📌 ДЕНЬ 2. ТВОЇ ЦІННОСТІ – ТВОЯ СУПЕРСИЛА!",
+      3: "📌 ДЕНЬ 3. ДОРОСЛІСТЬ – ЦЕ СМІЛИВІСТЬ БУТИ СОБОЮ",
+      4: "📌 ДЕНЬ 4. ПЕРЕЗАВАНТАЖЕННЯ ТА ПІДСУМКИ БЛОКУ",
+      5: "📌 ДЕНЬ 5. ТВОЇ ЕМОЦІЇ – ЦЕ ТВОЇ ІНСТРУМЕНТИ",
+      6: "📌 ДЕНЬ 6. ПРИРУЧИ СВОЇ ЕМОЦІЇ: СТАБІЛЬНІСТЬ НА МАКСИМАЛКАХ",
+      7: "📌 ДЕНЬ 7. ЕМОЦІЙНІ КОРДОНИ – НАВЧИСЯ КАЗАТИ «НІ» ЧУЖИМ СТАНАМ",
+      8: "📌 ДЕНЬ 8. ДЕНЬ РЕФЛЕКСІЇ: ЕМОЦІЙНА АВТОНОМІЯ",
+      9: "📌 ДЕНЬ 9. ФІНАНСОВИЙ СЦЕНАРІЙ: НА ЩО ТИ ЗАПРОГРАМОВАНИЙ(-А)?",
+      10: "📌 ДЕНЬ 10. ГРОШІ = ВІДПОВІДАЛЬНІСТЬ",
+      11: "📌 ДЕНЬ 11. ТИ КЕРУЄШ ГРОШИМА, А НЕ ВОНИ ТОБОЮ",
+      12: "📌 ДЕНЬ 12. ТИ ВЗЯВ(-ЛА) КОНТРОЛЬ НАД ГРОШИМА! 🔥",
+      13: "📌 ДЕНЬ 13. ЦЕ НЕ Я, ЦЕ ЗІРКИ…",
+      14: "📌 ДЕНЬ 14. Я ВИРІШУЮ, А НЕ ЗАВИСАЮ",
+      15: "📌 ДЕНЬ 15. ВІДПОВІДАЛЬНІСТЬ ≠ САМОПОЖЕРТВА",
+      16: "📌 ДЕНЬ 16. ЗАПАКУЙ СВІЙ ВИБІР У СИЛУ",
+      17: "📌 ДЕНЬ 17. ТЯГНУ ТЕБЕ, АБО ЛЮБЛЮ?",
+      18: "📌 ДЕНЬ 18. МОЖНА НЕ ВІДКРИВАТИ ДВЕРІ…",
+      19: "📌 ДЕНЬ 19. ЗРІЛА КОМУНІКАЦІЯ",
+      20: "📌 ДЕНЬ 20. СТОСУНКИ, ЯКІ НЕ СТИРАЮТЬ МЕНЕ",
+      21: "📌 ДЕНЬ 21. ТІЛО — ЦЕ НЕ УПАКОВКА…",
+      22: "📌 ДЕНЬ 22. ЗВИЧКИ, ЯКІ ПІДЖИВЛЮЮТЬ",
+      23: "📌 ДЕНЬ 23. КУДИ ЗНИКАЄ МОЯ ЕНЕРГІЯ?",
+      24: "📌 ДЕНЬ 24. Я БІЛЬШЕ НЕ ЖИВУ, ЯК ЗАРЯДКА НА 1%",
+      25: "📌 ДЕНЬ 25. ПЛАН ВПАВ. Я – НІ.",
+      26: "📌 ДЕНЬ 26. КОЛИ ВСЕ РОЗСИПАЄТЬСЯ…",
+      27: "📌 ДЕНЬ 27. НЕ ТІЛЬКИ ВИТРИМАТИ, А Й ЖИТИ",
+      28: "📌 ДЕНЬ 28. КОЛИ НАКРИВАЄ…",
+      29: "📌 День 29 — Я бачу свій шлях",
+      30: "🎯 ДЕНЬ 30 — ТОЧКА Б",
+      31: "Вечірнє звернення – День 3"
+    };
+
+    function loadDayContent(dayNumber) {
+      document.querySelectorAll("#daysList li").forEach(li => li.classList.remove("active"));
+      document.querySelector(`#daysList li[data-day='${dayNumber}']`)?.classList.add("active");
+
+      document.getElementById("dayTitle").textContent = titles[dayNumber] || `День ${dayNumber}`;
+      fetch(`./days/day${dayNumber}.txt`)
+        .then(response => response.text())
+        .then(text => {
+          document.getElementById("dayContent").innerText = text;
+        })
+        .catch(error => {
+          document.getElementById("dayContent").innerText = "Контент для цього дня буде додано пізніше.";
+        });
+
+      loadDayAssets(dayNumber);
+    }
+
+    function loadDayAssets(dayNumber) {
+      const dayAssets = document.getElementById("dayAssets");
+      dayAssets.innerHTML = '';
+
+      const photoDays = [2, 25];
+      if (photoDays.includes(dayNumber)) {
+        const img = document.createElement("img");
+        img.src = `./assets/images/day${dayNumber}.jpg`;
+        img.alt = `Фото для дня ${dayNumber}`;
+        img.className = "asset-image";
+        dayAssets.appendChild(img);
+      }
+
+      const audioDays = [2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 18, 19, 21, 25, 27];
+      if (audioDays.includes(dayNumber)) {
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = `./assets/audio/day${dayNumber}.mp3`;
+        audio.className = "asset-audio";
+        dayAssets.appendChild(audio);
+      }
+
+      const pdfDays = [3, 5, 6, 7, 9, 11, 14, 15, 17, 18, 19, 21, 22, 23, 27, 29];
+      if (pdfDays.includes(dayNumber)) {
+        const pdfLink = document.createElement("a");
+        pdfLink.href = `./assets/pdf/day${dayNumber}.pdf`;
+        pdfLink.target = "_blank";
+        pdfLink.textContent = "📄 PDF інструкції для дня";
+        pdfLink.className = "asset-pdf";
+        dayAssets.appendChild(pdfLink);
+      }
+    }
+
+    function renderDays() {
+      const daysList = document.getElementById("daysList");
+      for (let i = 1; i <= 30; i++) {
+        const li = document.createElement("li");
+        li.textContent = titles[i] || `День ${i}`;
+        li.dataset.day = i;
+
+        li.onclick = () => loadDayContent(i);
+        daysList.appendChild(li);
+      }
+    }
+
+    renderDays();
+    loadDayContent(1); // загрузка первого дня при старте
+  </script>
+</body>
+</html>

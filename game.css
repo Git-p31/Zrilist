@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #eef3f7;
+  color: #333;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 320px;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+}
+
+.sidebar h2 {
+  font-size: 1.6em;
+  margin-bottom: 15px;
+  color: #444;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  background: #f7f9fc;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: 1px solid transparent;
+}
+
+.sidebar li:hover {
+  background-color: #e3eaf2;
+}
+
+.sidebar li.active {
+  background-color: #d6e6ff;
+  font-weight: bold;
+  border-color: #007bff;
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+  background: #fdfdfd;
+  overflow-y: auto;
+}
+
+.content h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.content p {
+  font-size: 1.15em;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+#dayAssets {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.asset-image {
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.asset-audio {
+  outline: none;
+}
+
+.asset-pdf {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.3s;
+  width: fit-content;
+}
+
+.asset-pdf:hover {
+  background-color: #0056b3;
+}
