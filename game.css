@@ -108,3 +108,47 @@ body {
   background: #f1f1f1;
   border: 1px dashed #ccc;
 }
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    box-shadow: none;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .sidebar h2 {
+    font-size: 1.4em;
+  }
+
+  .sidebar li {
+    font-size: 1em;
+    padding: 8px 12px;
+  }
+
+  .content h1 {
+    font-size: 1.6em;
+  }
+
+  .content p {
+    font-size: 1em;
+  }
+
+  .asset-pdf {
+    font-size: 0.95em;
+    padding: 8px 14px;
+  }
+
+  .asset-audio {
+    width: 100%;
+  }
+}
