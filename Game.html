@@ -133,21 +133,32 @@
       }
     }
 
-    function renderDays() {
-      const daysList = document.getElementById("daysList");
-      daysList.innerHTML = '';
+function renderDays() {
+  const daysList = document.getElementById("daysList");
+  daysList.innerHTML = '';
 
-      dayOrder.forEach(dayKey => {
-        const li = document.createElement("li");
-        li.textContent = titles[dayKey] || `День ${dayKey}`;
-        li.dataset.day = dayKey;
-        li.onclick = () => loadDayContent(dayKey);
-        daysList.appendChild(li);
-      });
+  dayOrder.forEach(dayKey => {
+    const li = document.createElement("li");
+    li.textContent = titles[dayKey] || `День ${dayKey}`;
+    li.dataset.day = dayKey;
+
+    // Если день 0 — активный, иначе заблокированный
+    if (dayKey === "0") {
+      li.onclick = () => loadDayContent(dayKey);
+      li.classList.add("active"); // Сделать активным по умолчанию
+    } else {
+      li.classList.add("locked");
+      // Клик для заблокированных дней не добавляем (можно запретить даже pointer events через css)
     }
 
-    renderDays();
-    loadDayContent("0");
+    daysList.appendChild(li);
+  });
+}
+
+// Запуск рендера и загрузка первого дня
+renderDays();
+loadDayContent("0");
+
   </script>
 </body>
 </html>
