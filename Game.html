@@ -69,16 +69,27 @@
     const audioDays = [2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 18, 19, 21, 25, 27];
     const pdfDays = [3, 5, 6, 7, 9, 11, 14, 15, 17, 18, 19, 21, 22, 23, 27, 29];
 
-    function loadDayContent(dayKey) {
-      document.querySelectorAll("#daysList li").forEach(li => li.classList.remove("active"));
-      document.querySelector(`#daysList li[data-day='${dayKey}']`)?.classList.add("active");
+    function isNumeric(value) {
+      return !isNaN(parseFloat(value)) && isFinite(value);
+    }
 
+    function loadDayContent(dayKey) {
+      // Снять класс active у всех и поставить актив на текущий
+      document.querySelectorAll("#daysList li").forEach(li => li.classList.remove("active"));
+      const activeLi = document.querySelector(`#daysList li[data-day='${dayKey}']`);
+      if (activeLi) activeLi.classList.add("active");
+
+      // Заголовок
       document.getElementById("dayTitle").textContent = titles[dayKey] || `День ${dayKey}`;
 
+      // Контент
       fetch(`./days/day${dayKey}.txt`)
-        .then(response => response.ok ? response.text() : Promise.reject("Немає файла"))
+        .then(response => {
+          if (!response.ok) throw new Error("Немає файла");
+          return response.text();
+        })
         .then(text => {
-          document.getElementById("dayContent").innerText = text;
+          document.getElementById("dayContent").innerText = text.trim() ? text : "Контент для цього дня буде додано пізніше.";
         })
         .catch(() => {
           document.getElementById("dayContent").innerText = "Контент для цього дня буде додано пізніше.";
@@ -91,29 +102,34 @@
       const dayAssets = document.getElementById("dayAssets");
       dayAssets.innerHTML = "";
 
-      if (photoDays.includes(Number(dayKey))) {
-        const img = document.createElement("img");
-        img.src = `./assets/images/day${dayKey}.jpg`;
-        img.alt = `Фото для дня ${dayKey}`;
-        img.className = "asset-image";
-        dayAssets.appendChild(img);
-      }
+      // Преобразуем ключ в число для проверки
+      const numericDay = parseFloat(dayKey);
 
-      if (audioDays.includes(Number(dayKey))) {
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = `./assets/audio/day${dayKey}.mp3`;
-        audio.className = "asset-audio";
-        dayAssets.appendChild(audio);
-      }
+      if (isNumeric(dayKey)) {
+        if (photoDays.includes(numericDay)) {
+          const img = document.createElement("img");
+          img.src = `./assets/images/day${numericDay}.jpg`;
+          img.alt = `Фото для дня ${numericDay}`;
+          img.className = "asset-image";
+          dayAssets.appendChild(img);
+        }
 
-      if (pdfDays.includes(Number(dayKey))) {
-        const pdfLink = document.createElement("a");
-        pdfLink.href = `./assets/pdf/day${dayKey}.pdf`;
-        pdfLink.target = "_blank";
-        pdfLink.textContent = "📄 PDF інструкції для дня";
-        pdfLink.className = "asset-pdf";
-        dayAssets.appendChild(pdfLink);
+        if (audioDays.includes(numericDay)) {
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.src = `./assets/audio/day${numericDay}.mp3`;
+          audio.className = "asset-audio";
+          dayAssets.appendChild(audio);
+        }
+
+        if (pdfDays.includes(numericDay)) {
+          const pdfLink = document.createElement("a");
+          pdfLink.href = `./assets/pdf/day${numericDay}.pdf`;
+          pdfLink.target = "_blank";
+          pdfLink.textContent = "📄 PDF інструкції для дня";
+          pdfLink.className = "asset-pdf";
+          dayAssets.appendChild(pdfLink);
+        }
       }
     }
 
