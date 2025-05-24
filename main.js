@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Инициализация AOS (Animate On Scroll)
+  // AOS (Animate On Scroll)
   if (typeof AOS !== 'undefined') {
     AOS.init({
       duration: 600,
@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Карусель отзывов
+  // ======= КАРУСЕЛЬ ОТЗЫВОВ =======
   const track = document.querySelector('.carousel-track');
-  const testimonials = Array.from(track.children);
+  const testimonials = Array.from(track?.children || []);
   const prevBtn = document.querySelector('.prev-btn');
   const nextBtn = document.querySelector('.next-btn');
 
@@ -34,21 +34,32 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCarousel();
   }
 
-  // Обработчики кнопок
-  prevBtn.addEventListener('click', () => {
-    showPrev();
-    resetAutoSlide();
-  });
+  if (prevBtn && nextBtn && testimonials.length > 0) {
+    prevBtn.addEventListener('click', () => {
+      showPrev();
+      resetAutoSlide();
+    });
 
-  nextBtn.addEventListener('click', () => {
-    showNext();
-    resetAutoSlide();
-  });
+    nextBtn.addEventListener('click', () => {
+      showNext();
+      resetAutoSlide();
+    });
 
-  // Автопрокрутка
+    const carousel = document.querySelector('.carousel');
+    carousel?.addEventListener('mouseenter', () => {
+      clearInterval(autoSlideInterval);
+    });
+    carousel?.addEventListener('mouseleave', () => {
+      resetAutoSlide();
+    });
+
+    updateCarousel();
+    startAutoSlide();
+  }
+
   function startAutoSlide() {
-    if (testimonials.length <= 1) return; // Не запускать если только один отзыв
-    autoSlideInterval = setInterval(showNext, 5000); // каждые 5 секунд
+    if (testimonials.length <= 1) return;
+    autoSlideInterval = setInterval(showNext, 5000);
   }
 
   function resetAutoSlide() {
@@ -56,17 +67,17 @@ document.addEventListener('DOMContentLoaded', () => {
     startAutoSlide();
   }
 
-  // Остановить автопрокрутку при наведении
-  const carousel = document.querySelector('.carousel');
-  carousel.addEventListener('mouseenter', () => {
-    clearInterval(autoSlideInterval);
+  // ======= АНИМАЦИЯ ОТКРЫТИЯ НОВОГО ДНЯ =======
+  const newDays = document.querySelectorAll('.sidebar li.new');
+
+  newDays.forEach((day) => {
+    // Проверяем, открыт ли уже (чтобы не переанимировать)
+    if (!day.classList.contains('unlocked')) {
+      day.classList.add('unlock-animation', 'unlocked'); // добавляем анимацию
+      setTimeout(() => {
+        day.classList.remove('unlock-animation'); // удаляем класс, чтобы можно было снова анимировать
+      }, 1000);
+    }
   });
 
-  carousel.addEventListener('mouseleave', () => {
-    resetAutoSlide();
-  });
-
-  // Инициализация
-  updateCarousel();
-  startAutoSlide();
 });
