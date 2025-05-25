@@ -142,18 +142,18 @@ function renderDays() {
     li.textContent = titles[dayKey] || `День ${dayKey}`;
     li.dataset.day = dayKey;
 
-    // Если день 0 — активный, иначе заблокированный
-    if (dayKey === "0") {
+    if (["0", "0.1", "1"].includes(dayKey)) {
       li.onclick = () => loadDayContent(dayKey);
-      li.classList.add("active"); // Сделать активным по умолчанию
+      li.classList.add("active"); // По умолчанию активный стиль
     } else {
       li.classList.add("locked");
-      // Клик для заблокированных дней не добавляем (можно запретить даже pointer events через css)
+      // Заблокированные элементы не имеют обработчика onclick
     }
 
     daysList.appendChild(li);
   });
 }
+
 
 // Запуск рендера и загрузка первого дня
 renderDays();
