@@ -5,129 +5,45 @@
   <title>Оплата доступу до гри</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
+      margin: 0; padding: 0; height: 100vh;
       background: linear-gradient(135deg, #0a1f44, #00122d);
       font-family: 'Montserrat', sans-serif;
       color: #cbd5e1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 30px 20px;
-      perspective: 800px;
-      user-select: none;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding: 30px 20px;
     }
-
     h1 {
-      font-size: 3.5rem;
-      margin-bottom: 0.4em;
+      font-size: 3.5rem; margin-bottom: 0.4em;
       color: #e0e7ff;
-      text-shadow:
-        0 4px 6px rgba(0, 0, 0, 0.7),
-        0 8px 12px rgba(0, 0, 0, 0.5);
-      transform: translateZ(40px);
     }
-
     p.description {
-      font-size: 1.3rem;
-      margin-bottom: 3em;
-      font-weight: 600;
-      max-width: 440px;
-      line-height: 1.5;
-      color: #a0aec0;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-      transform: translateZ(30px);
+      font-size: 1.3rem; margin-bottom: 3em;
+      font-weight: 600; max-width: 440px;
+      line-height: 1.5; color: #a0aec0;
     }
-
     button {
-      font-size: 1.5rem;
-      font-weight: 700;
-      padding: 18px 60px;
-      margin: 15px 20px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      font-size: 1.5rem; font-weight: 700;
+      padding: 18px 60px; margin: 15px 20px;
+      border: none; border-radius: 12px;
+      cursor: pointer; transition: all 0.3s ease;
       min-width: 200px;
-      box-shadow:
-        0 8px 15px rgba(0, 0, 0, 0.6),
-        inset 0 -3px 6px rgba(255, 255, 255, 0.1);
-      color: #eef2ff;
-      transform-style: preserve-3d;
-      transform: translateZ(20px);
-      user-select: none;
     }
-
-    button#payBtn {
-      background: linear-gradient(145deg, #2a3a7a, #12204d);
-      box-shadow:
-        0 8px 15px rgba(18, 32, 77, 0.9),
-        inset 0 -3px 8px rgba(255, 255, 255, 0.15);
-      text-shadow: 0 1px 2px #000c3f;
+    #payBtn {
+      background: #2a3a7a; color: #eef2ff;
     }
-
-    button#payBtn:hover:not(:disabled) {
-      background: linear-gradient(145deg, #3b4faa, #223370);
-      box-shadow:
-        0 10px 20px rgba(59, 79, 170, 0.9),
-        inset 0 -4px 9px rgba(255, 255, 255, 0.2);
-      transform: translateZ(25px) scale(1.05);
-    }
-
-    button#payBtn:disabled {
-      background: #3b3f60;
-      box-shadow: none;
+    #payBtn:disabled {
+      background: #555; color: #aaa;
       cursor: not-allowed;
-      color: #7a8aaf;
-      transform: translateZ(20px);
     }
-
-    button#playBtn {
-      background: linear-gradient(145deg, #3a7a53, #1d442b);
-      box-shadow:
-        0 8px 15px rgba(29, 68, 43, 0.85),
-        inset 0 -3px 6px rgba(255, 255, 255, 0.15);
-      text-shadow: 0 1px 2px #0a230b;
+    #playBtn {
+      background: #3a7a53; color: #eef2ff;
     }
-
-    button#playBtn:hover:not(:disabled) {
-      background: linear-gradient(145deg, #52a367, #2c6b3f);
-      box-shadow:
-        0 10px 22px rgba(82, 163, 103, 0.9),
-        inset 0 -4px 9px rgba(255, 255, 255, 0.25);
-      transform: translateZ(25px) scale(1.05);
-    }
-
-    button#playBtn:disabled {
-      background: #254632;
-      box-shadow: none;
+    #playBtn:disabled {
+      background: #555; color: #aaa;
       cursor: not-allowed;
-      color: #4b6a52;
-      transform: translateZ(20px);
-    }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-      p.description {
-        font-size: 1rem;
-        max-width: 90%;
-      }
-      button {
-        padding: 14px 40px;
-        font-size: 1.2rem;
-        min-width: 160px;
-      }
     }
   </style>
 </head>
@@ -146,14 +62,15 @@
     const playBtn = document.getElementById('playBtn');
 
     payBtn.addEventListener('click', () => {
-      window.open('https://www.privat24.ua/rd/send_qr/liqpay_static_qr/payment_2640988267.e0323ab0d6eca2eb0c18d64803e4b8f96e2765a8d728898337d0c90d1667fa26', '_blank');
+      window.open('https://www.liqpay.ua/api/3/checkout?data=eyJ2ZXJzaW9uIjozLCJhY3Rpb24iOiJwYXkiLCJhbW91bnQiOiI3NTAiLCJjdXJyZW5jeSI6IlVBSCIsImRlc2NyaXB0aW9uIjoi0J/RgdC40YXQvtC70L7Qs9GW0YfQvdCwINCz0YDQsCIsInB1YmxpY19rZXkiOiJpOTkxMDA3NDEwMzMiLCJsYW5ndWFnZSI6InVrIn0=&signature=FJyaxt+niiUpSnk9RybogB4I4Ag=', '_blank');
 
       payBtn.disabled = true;
-      payBtn.textContent = 'Очікуйте...';
+      payBtn.textContent = 'Очікуємо підтвердження...';
 
       setTimeout(() => {
         playBtn.disabled = false;
-        payBtn.textContent = 'Оплатити';
+        payBtn.disabled = false;
+        payBtn.textContent = 'Оплатити повторно';
       }, 60000);
     });
 
