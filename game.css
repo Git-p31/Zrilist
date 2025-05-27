@@ -239,3 +239,8 @@ a:hover {
 .sidebar li.new.unlock-animation {
   animation: unlockDay 0.8s ease-out;
 }
+.locked .timer {
+  font-size: 0.85em;
+  color: #888;
+  margin-left: 6px;
+}
