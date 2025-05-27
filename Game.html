@@ -4,7 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Гра — Шлях зрілості</title>
-  <link rel="stylesheet" href="game.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .container { display: flex; height: 100vh; }
+    .sidebar { width: 300px; background: #f4f4f4; padding: 20px; overflow-y: auto; }
+    .content { flex: 1; padding: 20px; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 8px 12px; margin-bottom: 6px; cursor: pointer; border-radius: 4px; }
+    li.locked { color: #888; cursor: default; background: #eee; }
+    li.unlocked:hover { background: #cce5ff; }
+    li.active { background: #007bff; color: white; }
+    .timer { font-size: 0.9em; color: #555; margin-left: 8px; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -13,8 +24,8 @@
       <ul id="daysList"></ul>
     </aside>
     <main class="content">
-      <h1 id="dayTitle"></h1>
-      <p id="dayContent"></p>
+      <h1 id="dayTitle">Виберіть день</h1>
+      <p id="dayContent">Контент з'явиться тут після вибору дня.</p>
       <div id="dayAssets"></div>
     </main>
   </div>
@@ -29,29 +40,29 @@ const titles = {
   "31": "🌙 Вечірнє звернення – День 3",
   "4": "📌 ДЕНЬ 4. ПЕРЕЗАВАНТАЖЕННЯ ТА ПІДСУМКИ БЛОКУ",
   "5": "📌 ДЕНЬ 5. ТВОЇ ЕМОЦІЇ – ЦЕ ТВОЇ ІНСТРУМЕНТИ",
-  "6": "📌 ДЕНЬ 6. ПРИРУЧИ СВОЇ ЕМОЦІЇ: СТАБІЛЬНІСТЬ НА МАКСИМАЛКАХ",
-  "7": "📌 ДЕНЬ 7. ЕМОЦІЙНІ КОРДОНИ – НАВЧИСЯ КАЗАТИ «НІ» ЧУЖИМ СТАНАМ",
-  "8": "📌 ДЕНЬ 8. ДЕНЬ РЕФЛЕКСІЇ: ЕМОЦІЙНА АВТОНОМІЯ",
-  "9": "📌 ДЕНЬ 9. ФІНАНСОВИЙ СЦЕНАРІЙ: НА ЩО ТИ ЗАПРОГРАМОВАНИЙ(-А)?",
+  "6": "📌 ДЕНЬ 6. ПРИРУЧИ СВОЇ ЕМОЦІЇ",
+  "7": "📌 ДЕНЬ 7. ЕМОЦІЙНІ КОРДОНИ",
+  "8": "📌 ДЕНЬ 8. ЕМОЦІЙНА АВТОНОМІЯ",
+  "9": "📌 ДЕНЬ 9. ФІНАНСОВИЙ СЦЕНАРІЙ",
   "10": "📌 ДЕНЬ 10. ГРОШІ = ВІДПОВІДАЛЬНІСТЬ",
-  "11": "📌 ДЕНЬ 11. ТИ КЕРУЄШ ГРОШИМА, А НЕ ВОНИ ТОБОЮ",
-  "12": "📌 ДЕНЬ 12. ТИ ВЗЯВ(-ЛА) КОНТРОЛЬ НАД ГРОШИМА! 🔥",
+  "11": "📌 ДЕНЬ 11. ТИ КЕРУЄШ ГРОШИМА",
+  "12": "📌 ДЕНЬ 12. ТИ ВЗЯВ КОНТРОЛЬ НАД ГРОШИМА!",
   "13": "📌 ДЕНЬ 13. ЦЕ НЕ Я, ЦЕ ЗІРКИ…",
-  "14": "📌 ДЕНЬ 14. Я ВИРІШУЮ, А НЕ ЗАВИСАЮ",
+  "14": "📌 ДЕНЬ 14. Я ВИРІШУЮ",
   "15": "📌 ДЕНЬ 15. ВІДПОВІДАЛЬНІСТЬ ≠ САМОПОЖЕРТВА",
-  "16": "📌 ДЕНЬ 16. ЗАПАКУЙ СВІЙ ВИБІР У СИЛУ",
+  "16": "📌 ДЕНЬ 16. ЗАПАКУЙ СВІЙ ВИБІР",
   "16.1": "🌙 Вечірній фідбек – після дня 16",
   "17": "📌 ДЕНЬ 17. ТЯГНУ ТЕБЕ, АБО ЛЮБЛЮ?",
   "18": "📌 ДЕНЬ 18. МОЖНА НЕ ВІДКРИВАТИ ДВЕРІ…",
   "19": "📌 ДЕНЬ 19. ЗРІЛА КОМУНІКАЦІЯ",
-  "20": "📌 ДЕНЬ 20. СТОСУНКИ, ЯКІ НЕ СТИРАЮТЬ МЕНЕ",
+  "20": "📌 ДЕНЬ 20. СТОСУНКИ",
   "21": "📌 ДЕНЬ 21. ТІЛО — ЦЕ НЕ УПАКОВКА…",
-  "22": "📌 ДЕНЬ 22. ЗВИЧКИ, ЯКІ ПІДЖИВЛЮЮТЬ",
+  "22": "📌 ДЕНЬ 22. ЗВИЧКИ",
   "23": "📌 ДЕНЬ 23. КУДИ ЗНИКАЄ МОЯ ЕНЕРГІЯ?",
-  "24": "📌 ДЕНЬ 24. Я БІЛЬШЕ НЕ ЖИВУ, ЯК ЗАРЯДКА НА 1%",
+  "24": "📌 ДЕНЬ 24. Я БІЛЬШЕ НЕ ЖИВУ",
   "25": "📌 ДЕНЬ 25. ПЛАН ВПАВ. Я – НІ.",
   "26": "📌 ДЕНЬ 26. КОЛИ ВСЕ РОЗСИПАЄТЬСЯ…",
-  "27": "📌 ДЕНЬ 27. НЕ ТІЛЬКИ ВИТРИМАТИ, А Й ЖИТИ",
+  "27": "📌 ДЕНЬ 27. НЕ ТІЛЬКИ ВИТРИМАТИ",
   "28": "📌 ДЕНЬ 28. КОЛИ НАКРИВАЄ…",
   "29": "📌 День 29 — Я бачу свій шлях",
   "30": "🎯 ДЕНЬ 30 — ТОЧКА Б",
@@ -65,127 +76,119 @@ const dayOrder = [
   "26", "27", "28", "29", "30", "32"
 ];
 
-const photoDays = [2, 25];
-const audioDays = [2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 18, 19, 21, 25, 27];
-const pdfDays = [1, 3, 5, 6, 7, 9, 11, 14, 15, 17, 18, 19, 21, 22, 23, 27, 29];
+// Инициализация даты старта пользователя, если еще нет
+if (!localStorage.getItem("startDate")) {
+  const now = new Date();
+  localStorage.setItem("startDate", now.toISOString());
+}
+const userStartDate = new Date(localStorage.getItem("startDate"));
 
+// Проверка — вечерний день или нет
 function isEveningDay(dayKey) {
-  return ["31", "16.1"].includes(dayKey);
+  // Если день с точкой (например, "1.1") или входит в список вечерних дней
+  return dayKey.includes(".") || ["31", "16.1", "32"].includes(dayKey);
 }
 
-function isAlwaysOpen(dayKey) {
-  return ["0", "1", "1.1"].includes(dayKey);
-}
-
+// Получить дату разблокировки дня с учетом времени в Киеве
 function getUnlockDate(dayKey) {
-  const now = new Date();
-  const kievTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Kyiv" }));
-  const unlockTime = new Date(kievTime);
-  const hour = isEveningDay(dayKey) ? 19 : 7;
-  unlockTime.setHours(hour, 0, 0, 0);
-  return unlockTime;
+  const baseDay = Math.floor(parseFloat(dayKey));
+  const unlock = new Date(userStartDate);
+
+  // Добавляем количество дней от даты старта
+  unlock.setDate(unlock.getDate() + baseDay);
+
+  // Устанавливаем время: 7:00 утра для утренних дней, 19:00 вечера для вечерних
+  unlock.setHours(isEveningDay(dayKey) ? 19 : 7, 0, 0, 0);
+  return unlock;
 }
 
+// Проверка, открыт ли день
 function isDayUnlocked(dayKey) {
-  if (isAlwaysOpen(dayKey)) return true;
+  // Дни 0 и 1 считаются всегда открытыми
+  if (dayKey === "0" || dayKey === "1") return true;
 
   const now = new Date();
-  const kievTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Kyiv" }));
-  return kievTime >= getUnlockDate(dayKey);
+  return now >= getUnlockDate(dayKey);
 }
 
+// Формат оставшегося времени до открытия
 function formatTimeLeft(ms) {
-  const totalSec = Math.floor(ms / 1000);
-  const hrs = Math.floor(totalSec / 3600);
-  const mins = Math.floor((totalSec % 3600) / 60);
-  return `${hrs}г ${mins}хв`;
+  if (ms <= 0) return "0г 0хв";
+  const sec = Math.floor(ms / 1000);
+  const hrs = Math.floor(sec / 3600);
+  const min = Math.floor((sec % 3600) / 60);
+  return `${hrs}г ${min}хв`;
 }
 
+// Отрисовка списка дней
 function renderDays() {
-  const daysList = document.getElementById("daysList");
-  daysList.innerHTML = '';
+  const list = document.getElementById("daysList");
+  list.innerHTML = "";
 
   dayOrder.forEach(dayKey => {
     const li = document.createElement("li");
     li.dataset.day = dayKey;
+    li.textContent = titles[dayKey] || `День ${dayKey}`;
 
     if (isDayUnlocked(dayKey)) {
-      li.textContent = titles[dayKey];
+      li.classList.add("unlocked");
       li.onclick = () => loadDayContent(dayKey);
     } else {
-      const unlockDate = getUnlockDate(dayKey);
-      const now = new Date();
-      const diff = unlockDate - new Date(now.toLocaleString("en-US", { timeZone: "Europe/Kyiv" }));
-
       li.classList.add("locked");
-      li.innerHTML = `${titles[dayKey]} <span class="timer">🔒 Через ${formatTimeLeft(diff)}</span>`;
+      const diff = getUnlockDate(dayKey) - new Date();
+      li.innerHTML = `${titles[dayKey] || `День ${dayKey}`} <span class="timer">🔒 Через ${formatTimeLeft(diff)}</span>`;
     }
 
-    daysList.appendChild(li);
+    list.appendChild(li);
   });
 }
 
+// Загрузка контента для выбранного дня
 function loadDayContent(dayKey) {
+  // Подсветка активного дня
   document.querySelectorAll("#daysList li").forEach(li => li.classList.remove("active"));
-  const activeLi = document.querySelector(`#daysList li[data-day='${dayKey}']`);
+  const activeLi = document.querySelector(`#daysList li[data-day="${dayKey}"]`);
   if (activeLi) activeLi.classList.add("active");
 
+  // Отображаем заголовок
   document.getElementById("dayTitle").textContent = titles[dayKey] || `День ${dayKey}`;
 
+  // Загружаем контент из файла (замени путь на свой)
   fetch(`./days/day${dayKey}.txt`)
     .then(response => {
-      if (!response.ok) throw new Error("Немає файла");
+      if (!response.ok) throw new Error("Файл не найден");
       return response.text();
     })
     .then(text => {
-      document.getElementById("dayContent").innerText = text.trim() ? text : "Контент для цього дня буде додано пізніше.";
+      document.getElementById("dayContent").innerText = text.trim() || "Контент буде додано пізніше.";
     })
     .catch(() => {
-      document.getElementById("dayContent").innerText = "Контент для цього дня буде додано пізніше.";
+      document.getElementById("dayContent").innerText = "Контент буде додано пізніше.";
     });
 
-  loadDayAssets(dayKey);
+  // Можно здесь добавить загрузку фото, аудио и прочего в #dayAssets
+  document.getElementById("dayAssets").innerHTML = "";
 }
 
-function loadDayAssets(dayKey) {
-  const dayAssets = document.getElementById("dayAssets");
-  dayAssets.innerHTML = "";
-  const numericDay = parseFloat(dayKey);
-
-  if (!isNaN(numericDay)) {
-    if (photoDays.includes(numericDay)) {
-      const img = document.createElement("img");
-      img.src = `./assets/images/day${numericDay}.jpg`;
-      img.alt = `Фото для дня ${numericDay}`;
-      img.className = "asset-image";
-      dayAssets.appendChild(img);
+// Обновление таймеров каждую минуту
+function updateTimers() {
+  document.querySelectorAll("#daysList li.locked").forEach(li => {
+    const dayKey = li.dataset.day;
+    const diff = getUnlockDate(dayKey) - new Date();
+    if (diff <= 0) {
+      // Разблокировать день и обновить список
+      renderDays();
+    } else {
+      const timerSpan = li.querySelector(".timer");
+      if (timerSpan) timerSpan.textContent = `🔒 Через ${formatTimeLeft(diff)}`;
     }
-
-    if (audioDays.includes(numericDay)) {
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = `./assets/audio/day${numericDay}.mp3`;
-      audio.className = "asset-audio";
-      dayAssets.appendChild(audio);
-    }
-
-    if (pdfDays.includes(numericDay)) {
-      const pdfLink = document.createElement("a");
-      pdfLink.href = `./assets/pdf/day${numericDay}.pdf`;
-      pdfLink.target = "_blank";
-      pdfLink.textContent = "📄 PDF інструкції для дня";
-      pdfLink.className = "asset-pdf";
-      dayAssets.appendChild(pdfLink);
-    }
-  }
+  });
 }
 
-// Обновление каждые 60 секунд
-setInterval(renderDays, 60000);
-
+// Начальная отрисовка и запуск таймера обновления
 renderDays();
-loadDayContent("0");
-</script>
+setInterval(updateTimers, 60000);
 
+</script>
 </body>
 </html>
