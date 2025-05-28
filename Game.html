@@ -76,48 +76,40 @@ const dayOrder = [
   "26", "27", "28", "29", "30", "32"
 ];
 
-// Инициализация даты старта пользователя, если еще нет
+// Устанавливаем дату начала при первом запуске
 if (!localStorage.getItem("startDate")) {
-  const now = new Date();
-  localStorage.setItem("startDate", now.toISOString());
+  localStorage.setItem("startDate", new Date().toISOString());
 }
 const userStartDate = new Date(localStorage.getItem("startDate"));
 
-// Проверка — вечерний день или нет
-function isEveningDay(dayKey) {
-  // Если день с точкой (например, "1.1") или входит в список вечерних дней
-  return dayKey.includes(".") || ["31", "16.1", "32"].includes(dayKey);
+// Проверка вечернего дня
+function isEveningDay(key) {
+  return key.includes(".") || ["31", "16.1", "32"].includes(key);
 }
 
-// Получить дату разблокировки дня с учетом времени в Киеве
-function getUnlockDate(dayKey) {
-  const baseDay = Math.floor(parseFloat(dayKey));
+// Получение даты разблокировки
+function getUnlockDate(key) {
+  const baseDay = Math.floor(parseFloat(key));
   const unlock = new Date(userStartDate);
-
-  // Добавляем количество дней от даты старта
   unlock.setDate(unlock.getDate() + baseDay);
-
-  // Устанавливаем время: 7:00 утра для утренних дней, 19:00 вечера для вечерних
-  unlock.setHours(isEveningDay(dayKey) ? 19 : 7, 0, 0, 0);
+  unlock.setHours(isEveningDay(key) ? 19 : 7, 0, 0, 0);
   return unlock;
 }
 
-// Проверка, открыт ли день
-function isDayUnlocked(dayKey) {
-  // Дни 0 и 1 считаются всегда открытыми
-  if (dayKey === "0" || dayKey === "1") return true;
-
+// Проверка разблокированности дня
+function isDayUnlocked(key) {
+  if (["0", "1", "1.1"].includes(key)) return true;
   const now = new Date();
-  return now >= getUnlockDate(dayKey);
+  return now >= getUnlockDate(key);
 }
 
-// Формат оставшегося времени до открытия
+// Форматирование оставшегося времени
 function formatTimeLeft(ms) {
   if (ms <= 0) return "0г 0хв";
-  const sec = Math.floor(ms / 1000);
-  const hrs = Math.floor(sec / 3600);
-  const min = Math.floor((sec % 3600) / 60);
-  return `${hrs}г ${min}хв`;
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  return `${hours}г ${minutes}хв`;
 }
 
 // Отрисовка списка дней
@@ -125,40 +117,34 @@ function renderDays() {
   const list = document.getElementById("daysList");
   list.innerHTML = "";
 
-  dayOrder.forEach(dayKey => {
+  dayOrder.forEach(key => {
     const li = document.createElement("li");
-    li.dataset.day = dayKey;
-    li.textContent = titles[dayKey] || `День ${dayKey}`;
+    li.dataset.day = key;
+    li.textContent = titles[key] || `День ${key}`;
 
-    if (isDayUnlocked(dayKey)) {
+    if (isDayUnlocked(key)) {
       li.classList.add("unlocked");
-      li.onclick = () => loadDayContent(dayKey);
+      li.onclick = () => loadDayContent(key);
     } else {
       li.classList.add("locked");
-      const diff = getUnlockDate(dayKey) - new Date();
-      li.innerHTML = `${titles[dayKey] || `День ${dayKey}`} <span class="timer">🔒 Через ${formatTimeLeft(diff)}</span>`;
+      const diff = getUnlockDate(key) - new Date();
+      li.innerHTML = `${titles[key]} <span class="timer">🔒 Через ${formatTimeLeft(diff)}</span>`;
     }
 
     list.appendChild(li);
   });
 }
 
-// Загрузка контента для выбранного дня
-function loadDayContent(dayKey) {
-  // Подсветка активного дня
+// Загрузка контента дня
+function loadDayContent(key) {
   document.querySelectorAll("#daysList li").forEach(li => li.classList.remove("active"));
-  const activeLi = document.querySelector(`#daysList li[data-day="${dayKey}"]`);
+  const activeLi = document.querySelector(`#daysList li[data-day="${key}"]`);
   if (activeLi) activeLi.classList.add("active");
 
-  // Отображаем заголовок
-  document.getElementById("dayTitle").textContent = titles[dayKey] || `День ${dayKey}`;
+  document.getElementById("dayTitle").textContent = titles[key] || `День ${key}`;
 
-  // Загружаем контент из файла (замени путь на свой)
-  fetch(`./days/day${dayKey}.txt`)
-    .then(response => {
-      if (!response.ok) throw new Error("Файл не найден");
-      return response.text();
-    })
+  fetch(`./days/day${key}.txt`)
+    .then(res => res.ok ? res.text() : Promise.reject())
     .then(text => {
       document.getElementById("dayContent").innerText = text.trim() || "Контент буде додано пізніше.";
     })
@@ -166,29 +152,25 @@ function loadDayContent(dayKey) {
       document.getElementById("dayContent").innerText = "Контент буде додано пізніше.";
     });
 
-  // Можно здесь добавить загрузку фото, аудио и прочего в #dayAssets
   document.getElementById("dayAssets").innerHTML = "";
 }
 
-// Обновление таймеров каждую минуту
+// Обновление таймеров
 function updateTimers() {
   document.querySelectorAll("#daysList li.locked").forEach(li => {
-    const dayKey = li.dataset.day;
-    const diff = getUnlockDate(dayKey) - new Date();
+    const key = li.dataset.day;
+    const diff = getUnlockDate(key) - new Date();
     if (diff <= 0) {
-      // Разблокировать день и обновить список
       renderDays();
     } else {
-      const timerSpan = li.querySelector(".timer");
-      if (timerSpan) timerSpan.textContent = `🔒 Через ${formatTimeLeft(diff)}`;
+      const timer = li.querySelector(".timer");
+      if (timer) timer.textContent = `🔒 Через ${formatTimeLeft(diff)}`;
     }
   });
 }
 
-// Начальная отрисовка и запуск таймера обновления
 renderDays();
 setInterval(updateTimers, 60000);
-
 </script>
 </body>
 </html>
